@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ExodvsBot.Enums
+namespace ExodvsBot.Domain.Enums
 {
-    public enum RunIntervalEnum
+    public enum KlineIntervalEnum
     {
         /// <summary>
         /// 1s

@@ -1,5 +1,4 @@
-﻿using ExodvsBot.Dto;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,8 +8,9 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using ExodvsBot.Domain.Dto;
 
-namespace ExodvsBot.Files
+namespace ExodvsBot.Repository.Files
 {
     public class FileManagement
     {

@@ -1,14 +1,14 @@
 ﻿using Binance.Net.Clients;
 using Binance.Net.Enums;
 using CryptoExchange.Net.Authentication;
-using ExodvsBot.Dto;
+using ExodvsBot.Domain.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ExodvsBot.Binance
+namespace ExodvsBot.Services.Binance
 {
     public class BuySell
     {
@@ -188,8 +188,7 @@ namespace ExodvsBot.Binance
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erro ao buscar saldo: {ex.Message}");
-                throw;
+                return 0;
             }
         }
     }

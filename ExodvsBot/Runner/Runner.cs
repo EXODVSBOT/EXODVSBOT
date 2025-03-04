@@ -1,9 +1,9 @@
 ﻿using Binance.Net.Enums;
 using CryptoExchange.Net.CommonObjects;
-using ExodvsBot.Binance;
-using ExodvsBot.Calculos;
-using ExodvsBot.Dto;
-using ExodvsBot.Files;
+using ExodvsBot.Domain.Dto;
+using ExodvsBot.Repository.Files;
+using ExodvsBot.Services.Binance;
+using ExodvsBot.Services.Calculos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +30,7 @@ namespace ExodvsBot.Runner
             FileManagement.UpdateFileWithTranslatedWords();
             var binance = new BinanceRequests(settings.txtApiKey, settings.txtApiSecret);
             var buySell = new BuySell(settings.txtApiKey, settings.txtApiSecret);
-            var calculos = new Calculos.Calculos();
+            var calculos = new Calculos();
             var ocorrencias = await FileManagement.ReadFile();
             Ocorrencias.AddRange(ocorrencias);
 
@@ -67,8 +67,8 @@ namespace ExodvsBot.Runner
         }
 
         private static async void Run(BinanceRequests binance, 
-            StartSettingsDto settings, 
-            Calculos.Calculos calculos, 
+            StartSettingsDto settings,
+            Calculos calculos, 
             BuySell buySell)
         {
             try

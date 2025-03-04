@@ -1,10 +1,10 @@
-﻿using ExodvsBot.Files;
+﻿using ExodvsBot.Repository.Files;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ExodvsBot.Calculos
+namespace ExodvsBot.Services.Calculos
 {
     public class Decisao
     {
@@ -39,7 +39,7 @@ namespace ExodvsBot.Calculos
             if (ultimaOperacao == null) return "Keep";
 
             // Cálculo da diferença percentual (-10 para -10%, 1 para 1%, etc.)
-            decimal diferencaPercentual = ((bitcoinPrice - ultimaOperacao.PrecoBitcoin) / ultimaOperacao.PrecoBitcoin) * 100m;
+            decimal diferencaPercentual = (bitcoinPrice - ultimaOperacao.PrecoBitcoin) / ultimaOperacao.PrecoBitcoin * 100m;
 
             // Garantindo que stopLoss seja sempre negativo
             decimal stopLossNegativo = Math.Abs(stopLoss) * -1;
@@ -56,12 +56,12 @@ namespace ExodvsBot.Calculos
             }
 
             // Converter takeProfit para formato multiplicativo (1% → 1.01, 10% → 1.10)
-            decimal takeProfitMultiplicativo = 1m + (takeProfit / 100m);
+            decimal takeProfitMultiplicativo = 1m + takeProfit / 100m;
 
             // Condição de venda por RSI e banda superior
             if (rsiCalculo > rsiSell &&
                 bitcoinPrice > bandaSuperior &&
-                bitcoinPrice > (ultimaOperacao.PrecoBitcoin * takeProfitMultiplicativo))
+                bitcoinPrice > ultimaOperacao.PrecoBitcoin * takeProfitMultiplicativo)
             {
                 decisao = "Sell";
             }
