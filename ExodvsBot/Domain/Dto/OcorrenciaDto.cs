@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ExodvsBot.Dto
+namespace ExodvsBot.Domain.Dto
 {
     public class OcorrenciaDto
     {

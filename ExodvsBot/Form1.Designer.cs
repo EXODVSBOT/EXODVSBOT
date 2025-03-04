@@ -1,5 +1,5 @@
-﻿using ExodvsBot.Dto;
-using ExodvsBot.Enums;
+﻿using ExodvsBot.Domain.Dto;
+using ExodvsBot.Domain.Enums;
 using ExodvsBot.Runner;
 using System;
 using System.Drawing;

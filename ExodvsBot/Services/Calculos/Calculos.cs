@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ExodvsBot.Calculos
+namespace ExodvsBot.Services.Calculos
 {
     public class Calculos
     {
@@ -22,7 +22,7 @@ namespace ExodvsBot.Calculos
 
             for (int i = periodo; i < precos.Count; i++)
             {
-                mme = (precos[i] * alpha) + (mme * (1 - alpha)); // Fórmula da MME
+                mme = precos[i] * alpha + mme * (1 - alpha); // Fórmula da MME
             }
 
             return mme;
@@ -56,7 +56,7 @@ namespace ExodvsBot.Calculos
 
             // Cálculo do RSI
             decimal rs = ganhoMedio / perdaMedia;
-            decimal rsi = 100 - (100 / (1 + rs));
+            decimal rsi = 100 - 100 / (1 + rs);
 
             return rsi;
         }
@@ -106,8 +106,8 @@ namespace ExodvsBot.Calculos
             decimal desvioPadrao = (decimal)Math.Sqrt((double)variancias.Average());
 
             // Calcula as bandas
-            decimal bandaSuperior = mediaMovel + (desvioPadrao * multiplicador);
-            decimal bandaInferior = mediaMovel - (desvioPadrao * multiplicador);
+            decimal bandaSuperior = mediaMovel + desvioPadrao * multiplicador;
+            decimal bandaInferior = mediaMovel - desvioPadrao * multiplicador;
 
             return (bandaSuperior, bandaInferior, mediaMovel);
         }
@@ -120,7 +120,7 @@ namespace ExodvsBot.Calculos
             decimal minPeriodo = precos.Take(periodoK).Min();
             decimal fechamentoAtual = precos.Last();
 
-            decimal k = ((fechamentoAtual - minPeriodo) / (maxPeriodo - minPeriodo)) * 100;
+            decimal k = (fechamentoAtual - minPeriodo) / (maxPeriodo - minPeriodo) * 100;
 
             // Para o %D, calculamos a média móvel dos últimos valores de %K
             var valoresK = new List<decimal> { k };
@@ -130,7 +130,7 @@ namespace ExodvsBot.Calculos
 
                 maxPeriodo = precos.Skip(precos.Count - i - periodoK).Take(periodoK).Max();
                 minPeriodo = precos.Skip(precos.Count - i - periodoK).Take(periodoK).Min();
-                decimal kAnterior = ((precos[precos.Count - i - 1] - minPeriodo) / (maxPeriodo - minPeriodo)) * 100;
+                decimal kAnterior = (precos[precos.Count - i - 1] - minPeriodo) / (maxPeriodo - minPeriodo) * 100;
                 valoresK.Add(kAnterior);
             }
 

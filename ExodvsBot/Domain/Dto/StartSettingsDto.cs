@@ -1,11 +1,11 @@
-﻿using ExodvsBot.Enums;
+﻿using ExodvsBot.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ExodvsBot.Dto
+namespace ExodvsBot.Domain.Dto
 {
     public class StartSettingsDto
     {
