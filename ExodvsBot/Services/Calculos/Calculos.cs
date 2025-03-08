@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ExodvsBot.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -137,6 +138,95 @@ namespace ExodvsBot.Services.Calculos
             decimal d = valoresK.Take(periodoD).Average();
 
             return (k, d);
+        }
+
+        // Método principal que recebe os dados brutos e retorna o intervalo recomendado
+        public KlineIntervalEnum CalcularMelhorIntervalo(List<decimal> precos, List<decimal> volumes)
+        {
+            if (precos == null || precos.Count < 168) // 1 semana de dados em intervalos de 1h (7 dias * 24 horas)
+                return KlineIntervalEnum.OneHour; // Valor padrão seguro
+
+            // Etapa 1: Análise de volatilidade
+            var volatilidadeCurtoPrazo = CalcularVolatilidade(precos.TakeLast(24).ToList()); // Últimas 24 horas
+            var volatilidadeLongoPrazo = CalcularVolatilidade(precos); // Semana inteira
+
+            // Etapa 2: Identificar tendência
+            var tendencia = IdentificarTendencia(precos);
+
+            // Etapa 3: Analisar volume
+            var volumeMedio = volumes.Any() ? volumes.Average() : 0;
+
+            // Etapa 4: Tomar decisão com base nos fatores
+            return DeterminarIntervaloOtimizado(volatilidadeCurtoPrazo, volatilidadeLongoPrazo, tendencia, volumeMedio);
+        }
+
+        // Método auxiliar 1: Cálculo de volatilidade (Desvio Padrão dos Retornos)
+        private decimal CalcularVolatilidade(List<decimal> precos)
+        {
+            var retornos = new List<decimal>();
+            for (int i = 1; i < precos.Count; i++)
+            {
+                if (precos[i - 1] == 0) continue;
+                retornos.Add((precos[i] - precos[i - 1]) / precos[i - 1]);
+            }
+
+            if (!retornos.Any()) return 0;
+
+            decimal media = retornos.Average();
+            decimal somaQuadrados = retornos.Sum(r => (r - media) * (r - media));
+            return (decimal)Math.Sqrt((double)(somaQuadrados / retornos.Count));
+        }
+
+        // Método auxiliar 2: Identificação de tendência (Regressão Linear)
+        private TrendEnum IdentificarTendencia(List<decimal> precos)
+        {
+            int n = precos.Count;
+            decimal sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+
+            for (int i = 0; i < n; i++)
+            {
+                sumX += i;
+                sumY += precos[i];
+                sumXY += i * precos[i];
+                sumX2 += i * i;
+            }
+
+            decimal slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+            return slope > 0.005m ? TrendEnum.Alta : slope < -0.005m ? TrendEnum.Baixa : TrendEnum.Neutra;
+        }
+
+        // Método auxiliar 3: Lógica de decisão final
+        private KlineIntervalEnum DeterminarIntervaloOtimizado(
+            decimal volatilidadeCurto,
+            decimal volatilidadeLongo,
+            TrendEnum tendencia,
+            decimal volumeMedio)
+        {
+            // Fator de diferença de volatilidade
+            decimal diferencaVolatilidade = volatilidadeCurto / volatilidadeLongo;
+
+            // Regras de decisão
+            if (tendencia == TrendEnum.Alta)
+            {
+                return (diferencaVolatilidade > 1.5m) ?
+                    KlineIntervalEnum.ThirtyMinutes :
+                    KlineIntervalEnum.TwoHour;
+            }
+
+            if (volatilidadeCurto > 0.08m) // Volatilidade muito alta
+            {
+                return volumeMedio > 10000 ?
+                    KlineIntervalEnum.FourHour :
+                    KlineIntervalEnum.OneHour;
+            }
+
+            if (volatilidadeLongo < 0.03m) // Mercado estável
+            {
+                return KlineIntervalEnum.FifteenMinutes;
+            }
+
+            // Default para mercado moderado
+            return KlineIntervalEnum.OneHour;
         }
     }
 }

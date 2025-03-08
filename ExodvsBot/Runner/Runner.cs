@@ -73,6 +73,14 @@ namespace ExodvsBot.Runner
         {
             try
             {
+                //Criar método separado
+                // Passo 1: Buscar dados históricos para cálculo do intervalo
+                var dadosPrecos = await binance.GetHistoricalPrices("BTCUSDT", KlineInterval.OneHour, 168); // 1 semana de dados (7 dias * 24 horas)
+                var dadosVolume = await binance.GetVolumeData("BTCUSDT", KlineInterval.OneHour, 168);
+                // Passo 2: Calcular o melhor intervalo com base nos dados históricos
+                var intervaloRecomendado = calculos.CalcularMelhorIntervalo(dadosPrecos, dadosVolume);
+
+
                 // Busca preço atual do bitcoin
                 decimal bitcoinPrice = await binance.GetAssetPrice();
                 // Busca 10 últimos preços por minuto
