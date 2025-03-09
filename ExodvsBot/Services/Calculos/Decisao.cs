@@ -20,6 +20,11 @@ namespace ExodvsBot.Services.Calculos
         {
             string decisao = "Keep";
 
+            if(volumeList.Count() == 0 || bitcoinPrice == 0 || bandaSuperior == 0 || bandaInferior == 0)
+            {
+                return decisao;
+            }
+
             // Cálculo da média ajustada do volume
             var mediaVolume = volumeList.Average();
             var volumeAtual = volumeList.Last();

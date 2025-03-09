@@ -11,6 +11,7 @@ namespace ExodvsBot.Services.Calculos
     {
         public decimal CalcularMedia(List<decimal> medias)
         {
+            if(medias.Count() == 0) return 0;   
             return medias.Average();
         }
 
@@ -31,6 +32,8 @@ namespace ExodvsBot.Services.Calculos
 
         public decimal CalcularRSI(List<decimal> precos, int periodo)
         {
+            if(precos.Count() == 0) return 0;
+
             if (precos.Count < periodo)
                 throw new ArgumentException("A lista de preços deve ter pelo menos o número de períodos desejados.");
 
@@ -64,6 +67,8 @@ namespace ExodvsBot.Services.Calculos
 
         public (decimal macd, decimal signal) CalcularMACD(List<decimal> precos)
         {
+            if (precos.Count() == 0) return (0, 0);
+
             if (precos.Count < 26) return (0, 0); // Verifica se há preços suficientes
 
             // Calcula MME de 12 e 26 períodos
@@ -143,6 +148,8 @@ namespace ExodvsBot.Services.Calculos
         // Método principal que recebe os dados brutos e retorna o intervalo recomendado
         public KlineIntervalEnum CalcularMelhorIntervalo(List<decimal> precos, List<decimal> volumes)
         {
+            if(precos.Count == 0 || volumes.Count == 0) return KlineIntervalEnum.FifteenMinutes;
+
             if (precos == null || precos.Count < 168) // 1 semana de dados em intervalos de 1h (7 dias * 24 horas)
                 return KlineIntervalEnum.OneHour; // Valor padrão seguro
 
