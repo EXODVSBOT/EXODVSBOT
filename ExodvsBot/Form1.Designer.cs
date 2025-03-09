@@ -171,7 +171,7 @@ namespace ExodvsBot
             foreach (KlineIntervalEnum interval in Enum.GetValues(typeof(KlineIntervalEnum)))
                 cmbKlineInterval.Items.Add(interval);
 
-            cmbKlineInterval.SelectedIndex = 1;
+            cmbKlineInterval.SelectedIndex = 9;
             configLayout.Controls.Add(cmbKlineInterval, 1, 2);
 
             // Stoploss

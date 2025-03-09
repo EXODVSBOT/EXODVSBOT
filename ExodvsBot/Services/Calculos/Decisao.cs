@@ -12,29 +12,18 @@ namespace ExodvsBot.Services.Calculos
                                 decimal rsiCalculo,
                                 decimal rsiBuy,
                                 decimal rsiSell,
-                                decimal bandaSuperior,
-                                decimal bandaInferior,
-                                List<decimal> volumeList,
                                 int stopLoss,
                                 int takeProfit)
         {
             string decisao = "Keep";
 
-            if(volumeList.Count() == 0 || bitcoinPrice == 0 || bandaSuperior == 0 || bandaInferior == 0)
+            if( bitcoinPrice == 0 || rsiCalculo == 0)
             {
                 return decisao;
             }
 
-            // Cálculo da média ajustada do volume
-            var mediaVolume = volumeList.Average();
-            var volumeAtual = volumeList.Last();
-            var desvioPadraoVolume = Math.Sqrt(volumeList.Select(v => Math.Pow((double)(v - mediaVolume), 2)).Average());
-            var mediaVolumeAjustada = mediaVolume + (decimal)desvioPadraoVolume;
-
             // Condição de compra
-            if (rsiCalculo < rsiBuy &&
-                bitcoinPrice < bandaInferior &&
-                volumeAtual > mediaVolumeAjustada)
+            if (rsiCalculo < rsiBuy)
             {
                 return "Buy";
             }
@@ -65,7 +54,6 @@ namespace ExodvsBot.Services.Calculos
 
             // Condição de venda por RSI e banda superior
             if (rsiCalculo > rsiSell &&
-                bitcoinPrice > bandaSuperior &&
                 bitcoinPrice > ultimaOperacao.PrecoBitcoin * takeProfitMultiplicativo)
             {
                 decisao = "Sell";

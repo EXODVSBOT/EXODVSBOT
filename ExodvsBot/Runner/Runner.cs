@@ -94,20 +94,18 @@ namespace ExodvsBot.Runner
                 var PrecosCurtoPrazo = await binance.GetHistoricalPrices("BTCUSDT", (KlineInterval)settings.cmbKlineInterval, 20);
                 // Busca 50 últimos preços por minuto
                 var PrecosLongoPrazo = await binance.GetHistoricalPrices("BTCUSDT", (KlineInterval)settings.cmbKlineInterval, 50);
+                //define quantidade de candles
+                int quantidadeCandles = await calculos.DefinirQuantidadeDeCandles(settings.cmbKlineInterval, 14);
                 // Busca 14 últimos preços por minuto para RSI
-                var precosParaRSI = await binance.GetHistoricalPrices("BTCUSDT", (KlineInterval)settings.cmbKlineInterval, 14);
+                var precosParaRSI = await binance.GetHistoricalPrices("BTCUSDT", (KlineInterval)settings.cmbKlineInterval, quantidadeCandles);
                 // Busca 20 últimos preços para bandas de Bollinger
                 var precosParaBandas = await binance.GetHistoricalPrices("BTCUSDT", (KlineInterval)settings.cmbKlineInterval, 20);
                 // Busca o volume dos últimos 50 minutos
                 var volumeList = await binance.GetVolumeData("BTCUSDT", (KlineInterval)settings.cmbKlineInterval, 50);
                 // Inicia cálculos
                 decimal rsi = calculos.CalcularRSI(precosParaRSI, 14);
-                var (bandaSuperior, bandaInferior, mediaMovelBollinger) = calculos.CalcularBandasDeBollinger(precosParaBandas, 20, 2);
-                var (mcad, signal) = calculos.CalcularMACD(PrecosLongoPrazo);
-                var (k, d) = calculos.CalcularEstocastico(PrecosCurtoPrazo, 14, 3);
-
                 // Aqui você pode adicionar a lógica de compra/venda com base nos cálculos
-                var decisao = await Decisao.TomarDecisao(bitcoinPrice, rsi, settings.numBuyRSI, settings.numSellRSI, bandaSuperior, bandaInferior, volumeList, settings.cmbStoploss, settings.cmbTakeProfit);
+                var decisao = await Decisao.TomarDecisao(bitcoinPrice, rsi, settings.numBuyRSI, settings.numSellRSI,  settings.cmbStoploss, settings.cmbTakeProfit);
                 //operação
                 var ocorrencia = await buySell.IniciarOperacao(decisao);
 
