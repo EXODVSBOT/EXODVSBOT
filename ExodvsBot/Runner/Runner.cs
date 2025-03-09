@@ -1,6 +1,7 @@
 ﻿using Binance.Net.Enums;
 using CryptoExchange.Net.CommonObjects;
 using ExodvsBot.Domain.Dto;
+using ExodvsBot.Domain.Enums;
 using ExodvsBot.Repository.Files;
 using ExodvsBot.Services.Binance;
 using ExodvsBot.Services.Calculos;
@@ -46,6 +47,15 @@ namespace ExodvsBot.Runner
                         {
                             Run(binance, settings, calculos, buySell);
                         }
+                        if (!hasInternetConnection)
+                        {
+                            Logs.Add($"----------------------------------------");
+                            Logs.Add("💀 No internet connection...");
+
+                            // Limpa as listas se excederem o tamanho máximo
+                            ClearMemory(Logs, MaxLogs);
+                            ClearMemory(Ocorrencias, MaxOcorrencias);
+                        }
                         // Espera o período para rodar
                         await Task.Delay(TimeSpan.FromSeconds((double)settings.cmbRunInterval));
                     }
@@ -73,26 +83,29 @@ namespace ExodvsBot.Runner
         {
             try
             {
+                if (settings.cmbKlineInterval == KlineIntervalEnum.Automatic)
+                {
+                    settings.cmbKlineInterval =   await AutomaticKline(binance, calculos);
+                }
+
                 // Busca preço atual do bitcoin
                 decimal bitcoinPrice = await binance.GetAssetPrice();
                 // Busca 10 últimos preços por minuto
                 var PrecosCurtoPrazo = await binance.GetHistoricalPrices("BTCUSDT", (KlineInterval)settings.cmbKlineInterval, 20);
                 // Busca 50 últimos preços por minuto
                 var PrecosLongoPrazo = await binance.GetHistoricalPrices("BTCUSDT", (KlineInterval)settings.cmbKlineInterval, 50);
+                //define quantidade de candles
+                int quantidadeCandles = await calculos.DefinirQuantidadeDeCandles(settings.cmbKlineInterval, 14);
                 // Busca 14 últimos preços por minuto para RSI
-                var precosParaRSI = await binance.GetHistoricalPrices("BTCUSDT", (KlineInterval)settings.cmbKlineInterval, 14);
+                var precosParaRSI = await binance.GetHistoricalPrices("BTCUSDT", (KlineInterval)settings.cmbKlineInterval, quantidadeCandles);
                 // Busca 20 últimos preços para bandas de Bollinger
                 var precosParaBandas = await binance.GetHistoricalPrices("BTCUSDT", (KlineInterval)settings.cmbKlineInterval, 20);
                 // Busca o volume dos últimos 50 minutos
                 var volumeList = await binance.GetVolumeData("BTCUSDT", (KlineInterval)settings.cmbKlineInterval, 50);
                 // Inicia cálculos
                 decimal rsi = calculos.CalcularRSI(precosParaRSI, 14);
-                var (bandaSuperior, bandaInferior, mediaMovelBollinger) = calculos.CalcularBandasDeBollinger(precosParaBandas, 20, 2);
-                var (mcad, signal) = calculos.CalcularMACD(PrecosLongoPrazo);
-                var (k, d) = calculos.CalcularEstocastico(PrecosCurtoPrazo, 14, 3);
-
                 // Aqui você pode adicionar a lógica de compra/venda com base nos cálculos
-                var decisao = await Decisao.TomarDecisao(bitcoinPrice, rsi, settings.numBuyRSI, settings.numSellRSI, bandaSuperior, bandaInferior, volumeList, settings.cmbStoploss, settings.cmbTakeProfit);
+                var decisao = await Decisao.TomarDecisao(bitcoinPrice, rsi, settings.numBuyRSI, settings.numSellRSI,  settings.cmbStoploss, settings.cmbTakeProfit);
                 //operação
                 var ocorrencia = await buySell.IniciarOperacao(decisao);
 
@@ -125,7 +138,7 @@ namespace ExodvsBot.Runner
                 Logs.Add($"🤑 BTC Price: {bitcoinPrice.ToString("0.00")}");
                 Logs.Add($"📊 RSI: {rsi.ToString("0.00")}");
                 Logs.Add($"💰 UsdBalance: {ocorrencia.SaldoUsdt.ToString("0.00")}");
-                Logs.Add($"----------------------------------------");
+                Logs.Add($"📊 KlineInterval: {settings.cmbKlineInterval}");
 
                 // Limpa as listas se excederem o tamanho máximo
                 ClearMemory(Logs, MaxLogs);
@@ -137,6 +150,18 @@ namespace ExodvsBot.Runner
 
                 throw;
             }
+        }
+
+        private static async Task<KlineIntervalEnum> AutomaticKline(
+            BinanceRequests binance,
+            Calculos calculos
+            )
+        {
+            var dadosPrecos = await binance.GetHistoricalPrices("BTCUSDT", KlineInterval.OneHour, 168); // 1 semana de dados (7 dias * 24 horas)
+            var dadosVolume = await binance.GetVolumeData("BTCUSDT", KlineInterval.OneHour, 168);
+            var intervaloRecomendado = calculos.CalcularMelhorIntervalo(dadosPrecos, dadosVolume);
+
+            return intervaloRecomendado;
         }
 
         // Método para limpar a memória das listas

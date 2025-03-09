@@ -166,9 +166,12 @@ namespace ExodvsBot
             cmbKlineInterval.BackColor = Color.FromArgb(44, 47, 51);
             cmbKlineInterval.ForeColor = Color.White;
             cmbKlineInterval.FlatStyle = FlatStyle.Flat;
+
+
             foreach (KlineIntervalEnum interval in Enum.GetValues(typeof(KlineIntervalEnum)))
                 cmbKlineInterval.Items.Add(interval);
-            cmbKlineInterval.SelectedIndex = 1;
+
+            cmbKlineInterval.SelectedIndex = 9;
             configLayout.Controls.Add(cmbKlineInterval, 1, 2);
 
             // Stoploss

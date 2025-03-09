@@ -8,6 +8,7 @@ namespace ExodvsBot.Domain.Enums
 {
     public enum KlineIntervalEnum
     {
+        Automatic = 0,
         /// <summary>
         /// 1s
         /// </summary>
@@ -77,15 +78,5 @@ namespace ExodvsBot.Domain.Enums
         /// 3d
         /// </summary>
         ThreeDay = 60 * 60 * 24 * 3,
-
-        /// <summary>
-        /// 1w
-        /// </summary>
-        OneWeek = 60 * 60 * 24 * 7,
-
-        /// <summary>
-        /// 1M
-        /// </summary>
-        OneMonth = 60 * 60 * 24 * 30
     }
 }
